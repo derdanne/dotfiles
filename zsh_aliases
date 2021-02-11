@@ -96,6 +96,10 @@ git-tag-remove() {
 }
 
 # AWS cli
+aws-sm-list() {
+  aws secretsmanager list-secrets | jq -r '.SecretList[].Name'
+}
+
 aws-sm-get() {
   aws secretsmanager get-secret-value --secret-id ${1} | jq -r ".SecretString"
 }
@@ -119,4 +123,8 @@ aws-asg-describe() {
 aws-asg-refresh() {
   aws autoscaling start-instance-refresh --auto-scaling-group-name "${1}" | jq "."
   watch "aws autoscaling describe-instance-refreshes --auto-scaling-group-name ${1}"
+}
+
+aws-docdb-geteps() {
+  aws docdb describe-db-clusters | jq -r '.DBClusters[].Endpoint'
 }
