@@ -99,3 +99,12 @@ git-tag-remove() {
 aws-sm-get() {
   aws secretsmanager get-secret-value --secret-id ${1} | jq -r ".SecretString"
 }
+
+aws-ecr-login() {
+  aws ecr get-login-password | docker login --username AWS --password-stdin ${1}
+}
+
+aws-eks-login() {
+  aws eks --region eu-central-1 update-kubeconfig --name ${1} --kubeconfig config
+}
+
