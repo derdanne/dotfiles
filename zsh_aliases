@@ -125,6 +125,6 @@ aws-asg-refresh() {
   watch "aws autoscaling describe-instance-refreshes --auto-scaling-group-name ${1} | jq '.InstanceRefreshes[0]'"
 }
 
-aws-docdb-geteps() {
+aws-docdb-eps-get() {
   aws docdb describe-db-clusters | jq -r '.DBClusters[].Endpoint'
 }
