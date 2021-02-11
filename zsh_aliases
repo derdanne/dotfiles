@@ -108,3 +108,15 @@ aws-eks-login() {
   aws eks --region eu-central-1 update-kubeconfig --name ${1} --kubeconfig config
 }
 
+aws-asg-list() {
+  aws autoscaling describe-auto-scaling-groups | jq -r '.AutoScalingGroups[].AutoScalingGroupName'
+}
+
+aws-asg-describe() {
+  aws autoscaling describe-auto-scaling-groups --auto-scaling-group-name "${1}" | jq "."
+}
+
+aws-asg-refresh() {
+  aws autoscaling start-instance-refresh --auto-scaling-group-name "${1}" | jq "."
+  watch "aws autoscaling describe-instance-refreshes --auto-scaling-group-name ${1}"
+}
