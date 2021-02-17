@@ -25,6 +25,10 @@ git-flow-publish() {
   git flow release publish ${1}
 }
 
+git-release-finish() {
+  test ! -z ${1} && git flow release finish -m "[TASK] release ${1}" -p --pushproduction --pushdevelop --pushtag --fetch --squash --nokeeplocal --nokeepremote "${1}"
+}
+
 git-release-patch() {
   NEXT_VERSION="$(git-lasttag | awk -F. '{print $1 "." $2 "." $3 + 1}')"
   test ! -z "${NEXT_VERSION}" || NEXT_VERSION="0.0.1"
