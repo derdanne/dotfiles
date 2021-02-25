@@ -16,7 +16,7 @@ git-lasttag() {
 
 git-flow-release() {
   git flow release start "${1}"
-  git flow release finish -m "[TASK] release ${1}" -p --pushproduction --pushdevelop --pushtag --fetch --squash --nokeeplocal --nokeepremote "${1}"
+  git flow release finish -m "[TASK] release ${1}" -p --pushproduction --pushdevelop --pushtag --fetch --nokeeplocal --nokeepremote "${1}"
   git checkout develop
 }
 
@@ -26,7 +26,7 @@ git-flow-publish() {
 }
 
 git-release-finish() {
-  test ! -z ${1} && git flow release finish -m "[TASK] release ${1}" -p --pushproduction --pushdevelop --pushtag --fetch --squash --nokeeplocal --nokeepremote "${1}"
+  test ! -z ${1} && git flow release finish -m "[TASK] release ${1}" -p --pushproduction --pushdevelop --pushtag --fetch --nokeeplocal --nokeepremote "${1}"
 }
 
 git-release-patch() {
