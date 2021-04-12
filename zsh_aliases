@@ -16,49 +16,57 @@ git-lasttag() {
 
 git-flow-release() {
   git flow release start "${1}"
-  git flow release finish -m "[TASK] release ${1}" -p --pushproduction --pushdevelop --pushtag --fetch --nokeeplocal --nokeepremote "${1}"
+  git flow release finish -m "[TASK] release" -p --pushproduction --pushdevelop --pushtag --fetch --nokeeplocal --nokeepremote "${1}"
   git checkout develop
 }
 
-git-flow-publish() {
+git-flow-release-publish() {
   git flow release start ${1}
   git flow release publish ${1}
 }
 
-git-release-finish() {
-  test ! -z ${1} && git flow release finish -m "[TASK] release ${1}" -p --pushproduction --pushdevelop --pushtag --fetch --nokeeplocal --nokeepremote "${1}"
+git-flow-release-finish() {
+  test ! -z ${1} && git flow release finish -m "[TASK] release" -p --pushproduction --pushdevelop --pushtag --fetch --nokeeplocal --nokeepremote "${1}"
 }
 
-git-release-patch() {
+git-flow-release-patch() {
   NEXT_VERSION="$(git-lasttag | awk -F. '{print $1 "." $2 "." $3 + 1}')"
   test ! -z "${NEXT_VERSION}" || NEXT_VERSION="0.0.1"
   git-flow-release "${NEXT_VERSION}"
 }
 
-git-release-minor() {
+git-flow-release-minor() {
   NEXT_VERSION="$(git-lasttag | awk -F. '{print $1 "." $2 + 1 ".0"}')"
   git-flow-release "${NEXT_VERSION}"
 }
 
-git-release-major() {
+git-flow-release-major() {
   NEXT_VERSION="$(git-lasttag | awk -F. '{print $1 + 1 ".0.0"}')"
   git-flow-release "${NEXT_VERSION}"
 }
 
-git-publish-patch() {
+git-flow-release-publish-patch() {
   NEXT_VERSION="$(git-lasttag | awk -F. '{print $1 "." $2 "." $3 + 1}')"
   test ! -z "${NEXT_VERSION}" || NEXT_VERSION="0.0.1"
-  git-flow-publish "${NEXT_VERSION}"
+  git-flow-release-publish "${NEXT_VERSION}"
 }
 
-git-publish-minor() {
+git-flow-release-publish-minor() {
   NEXT_VERSION="$(git-lasttag | awk -F. '{print $1 "." $2 + 1 ".0"}')"
-  git-flow-publish "${NEXT_VERSION}"
+  git-flow-release-publish "${NEXT_VERSION}"
 }
 
-git-publish-major() {
+git-flow-release-publish-major() {
   NEXT_VERSION="$(git-lasttag | awk -F. '{print $1 + 1 ".0.0"}')"
-  git-flow-publish "${NEXT_VERSION}"
+  git-flow-release-publish "${NEXT_VERSION}"
+}
+
+git-flow-feature-start() {
+  test ! -z ${1} && git flow feature start ${1}
+}
+
+git-flow-feature-publish() {
+  test ! -z ${1} && git flow feature publish ${1}
 }
 
 git-pull-all() {
@@ -113,7 +121,8 @@ aws-ecr-login() {
 }
 
 aws-eks-login() {
-  aws eks --region eu-central-1 update-kubeconfig --name "${1}" --kubeconfig config
+  aws eks --region eu-central-1 update-kubeconfig --name "${1}" --kubeconfig ~/.kube/config
+  kubectx $(kubectx | grep "${1}")
 }
 
 aws-asg-list() {
@@ -132,3 +141,8 @@ aws-asg-refresh() {
 aws-docdb-eps-get() {
   aws docdb describe-db-clusters | jq -r '.DBClusters[].Endpoint'
 }
+
+aws-aurora-eps-get() {
+  aws rds describe-db-clusters | jq -r '.DBClusters[].Endpoint'
+}
+
