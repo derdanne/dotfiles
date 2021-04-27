@@ -120,6 +120,26 @@ aws-ecr-login() {
   aws ecr get-login-password | docker login --username AWS --password-stdin "${1}"
 }
 
+aws-ecr-list-all() {
+  aws ecr describe-repositories | jq -r '.repositories[].repositoryName' | sort
+}
+
+aws-ecr-list-images() {
+  aws ecr list-images --repository-name "${1}" | jq -r '.imageIds[]'
+}
+
+aws-ecr-list-imagetags() {
+  aws ecr list-images --repository-name "${1}" | jq -r '.imageIds[].imageTag' | sort -V
+}
+
+aws-ecr-show-image-digest-for-tag() {
+  aws ecr list-images --repository-name "${1}" | jq -r ".imageIds[] | select(.imageTag == \"${2}\").imageDigest"
+}
+
+aws-ecr-show-image-tag-for-digest() {
+  aws ecr list-images --repository-name "${1}" | jq -r ".imageIds[] | select(.imageDigest == \"${2}\").imageTag"
+}
+
 aws-eks-login() {
   aws eks --region eu-central-1 update-kubeconfig --name "${1}" --kubeconfig ~/.kube/config
   kubectx $(kubectx | grep "${1}")
