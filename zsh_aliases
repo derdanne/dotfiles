@@ -166,3 +166,6 @@ aws-aurora-eps-get() {
   aws rds describe-db-clusters | jq -r '.DBClusters[].Endpoint'
 }
 
+aws-elc-eps-get(){
+  aws elasticache describe-replication-groups | jq -r '.ReplicationGroups[].NodeGroups[].PrimaryEndpoint.Address'
+}
