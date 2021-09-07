@@ -158,6 +158,26 @@ aws-asg-refresh() {
   watch "aws autoscaling describe-instance-refreshes --auto-scaling-group-name ${1} | jq '.InstanceRefreshes[0]'"
 }
 
+aws-asg-eks-refresh-plan() {
+  export CLUSTER_NAME="${1}"
+  export ASG_NAMES="${2}"
+  export K8S_AUTOSCALER_ENABLED=true
+  export K8S_AUTOSCALER_NAMESPACE="kube-system"
+  export K8S_AUTOSCALER_DEPLOYMENT="cluster-autoscaler"
+  export GLOBAL_MAX_RETRY="25"
+  eks_rolling_update.py -c ${CLUSTER_NAME} -p 
+}
+
+aws-asg-eks-refresh() {
+  export CLUSTER_NAME="${1}"
+  export ASG_NAMES="${2}"
+  export K8S_AUTOSCALER_ENABLED=true
+  export K8S_AUTOSCALER_NAMESPACE="kube-system"
+  export K8S_AUTOSCALER_DEPLOYMENT="cluster-autoscaler" 
+  export GLOBAL_MAX_RETRY="25"
+  eks_rolling_update.py -c ${CLUSTER_NAME}
+}
+
 aws-docdb-eps-get() {
   aws docdb describe-db-clusters | jq -r '.DBClusters[].Endpoint'
 }
@@ -172,6 +192,10 @@ aws-elc-eps-get(){
 
 # Misc
 alias curlt="curl -sSo /dev/null -w 'time_namelookup:  %{time_namelookup}s\ntime_connect:  %{time_connect}s\ntime_appconnect:  %{time_appconnect}s\ntime_pretransfer:  %{time_pretransfer}s\ntime_redirect:  %{time_redirect}s\ntime_starttransfer:  %{time_starttransfer}s\ndownload_size: %{size_download} bytes\nresponse code: %{http_code}\n'"
+
+container-scan(){
+  docker run -u 1000:1000 -it --entrypoint /usr/local/bin/trivy -e "HTTPS_PROXY=$https_proxy" -v "/home/dk/tmp/trivy-cache:/trivy-cache" -v "/var/run/docker.sock:/var/run/docker.sock" -v /home/dk/.docker:/.docker public.ecr.aws/aquasecurity/trivy:latest --cache-dir /trivy-cache --quiet image --light --no-progress --exit-code 15 --ignore-unfixed --format json ${1}
+}
 
 # Kubernetes
 #
@@ -202,3 +226,14 @@ kcd-docdb-mgmt(){
 kx-elc-mgmt(){
   kubectl exec -n elc-redis-mgmt -it $(kubectl get -n elc-redis-mgmt -o custom-columns=:metadata.name pods --no-headers) -- /bin/bash
 }
+
+# waf
+aws-waf-report-current(){
+  aws lambda invoke --cli-binary-format raw-in-base64-out --payload '{"period": "current"}' --invocation-type Event --function-name GenerateWAFReport --region eu-central-1 /tmp/report.log
+}
+
+aws-waf-report-ip(){
+  aws lambda invoke --cli-binary-format raw-in-base64-out --payload '{"period": "current", "client_ip": "${1}"}' --invocation-type Event --function-name GenerateWAFReport --region eu-central-1 /tmp/report.log
+}
+
+
