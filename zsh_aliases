@@ -236,4 +236,6 @@ aws-waf-report-ip(){
   aws lambda invoke --cli-binary-format raw-in-base64-out --payload '{"period": "current", "client_ip": "${1}"}' --invocation-type Event --function-name GenerateWAFReport --region eu-central-1 /tmp/report.log
 }
 
-
+aws-ec2-list-running(){
+  aws ec2 describe-instances --filters Name=instance-state-name,Values=running | jq -r '.Reservations[]|.Instances[]|[(.Tags[]?|select(.Key=="Name")|.Value), (.Tags[]?|select(.Key=="aws:autoscaling:groupName")|.Value),.InstanceId,.ImageId,.PrivateIpAddress]|@csv'| sort
+}
