@@ -190,6 +190,22 @@ aws-elc-eps-get(){
   aws elasticache describe-replication-groups | jq -r '.ReplicationGroups[].NodeGroups[].PrimaryEndpoint.Address'
 }
 
+aws-ec2-list-running(){
+  aws ec2 describe-instances --filters Name=instance-state-name,Values=running | jq -r '.Reservations[]|.Instances[]|[(.Tags[]?|select(.Key=="Name")|.Value), (.Tags[]?|select(.Key=="aws:autoscaling:groupName")|.Value), (.Tags[]?|select(.Key=="aws:ec2launchtemplate:id")|.Value),.InstanceId,.ImageId,.PrivateIpAddress]|@csv'| sort
+}
+
+aws-ec2-list-ami-of-template(){
+  aws ec2 describe-launch-template-versions --launch-template-id "${1}" | jq -r '.LaunchTemplateVersions[].LaunchTemplateData.ImageId' | head -n 1
+}
+
+aws-waf-report-current(){
+  aws lambda invoke --cli-binary-format raw-in-base64-out --payload '{"period": "current"}' --invocation-type Event --function-name GenerateWAFReport --region eu-central-1 /tmp/report.log
+}
+
+aws-waf-report-ip(){
+  aws lambda invoke --cli-binary-format raw-in-base64-out --payload '{"period": "current", "client_ip": "${1}"}' --invocation-type Event --function-name GenerateWAFReport --region eu-central-1 /tmp/report.log
+}
+
 # Misc
 alias curlt="curl -sSo /dev/null -w 'time_namelookup:  %{time_namelookup}s\ntime_connect:  %{time_connect}s\ntime_appconnect:  %{time_appconnect}s\ntime_pretransfer:  %{time_pretransfer}s\ntime_redirect:  %{time_redirect}s\ntime_starttransfer:  %{time_starttransfer}s\ndownload_size: %{size_download} bytes\nresponse code: %{http_code}\n'"
 
@@ -225,17 +241,4 @@ kcd-docdb-mgmt(){
 
 kx-elc-mgmt(){
   kubectl exec -n elc-redis-mgmt -it $(kubectl get -n elc-redis-mgmt -o custom-columns=:metadata.name pods --no-headers) -- /bin/bash
-}
-
-# waf
-aws-waf-report-current(){
-  aws lambda invoke --cli-binary-format raw-in-base64-out --payload '{"period": "current"}' --invocation-type Event --function-name GenerateWAFReport --region eu-central-1 /tmp/report.log
-}
-
-aws-waf-report-ip(){
-  aws lambda invoke --cli-binary-format raw-in-base64-out --payload '{"period": "current", "client_ip": "${1}"}' --invocation-type Event --function-name GenerateWAFReport --region eu-central-1 /tmp/report.log
-}
-
-aws-ec2-list-running(){
-  aws ec2 describe-instances --filters Name=instance-state-name,Values=running | jq -r '.Reservations[]|.Instances[]|[(.Tags[]?|select(.Key=="Name")|.Value), (.Tags[]?|select(.Key=="aws:autoscaling:groupName")|.Value),.InstanceId,.ImageId,.PrivateIpAddress]|@csv'| sort
 }
