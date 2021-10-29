@@ -210,7 +210,7 @@ aws-waf-report-ip(){
 alias curlt="curl -sSo /dev/null -w 'time_namelookup:  %{time_namelookup}s\ntime_connect:  %{time_connect}s\ntime_appconnect:  %{time_appconnect}s\ntime_pretransfer:  %{time_pretransfer}s\ntime_redirect:  %{time_redirect}s\ntime_starttransfer:  %{time_starttransfer}s\ndownload_size: %{size_download} bytes\nresponse code: %{http_code}\n'"
 
 container-scan(){
-  docker run -u 1000:1000 -it --entrypoint /usr/local/bin/trivy -e "HTTPS_PROXY=$https_proxy" -v "/home/dk/tmp/trivy-cache:/trivy-cache" -v "/var/run/docker.sock:/var/run/docker.sock" -v /home/dk/.docker:/.docker public.ecr.aws/aquasecurity/trivy:latest --cache-dir /trivy-cache --quiet image --light --no-progress --exit-code 15 --ignore-unfixed --format json ${1}
+  docker run -u 1000:1000 -it --entrypoint /usr/local/bin/trivy -e "HTTPS_PROXY=$https_proxy" -v "/home/dk/tmp/trivy-cache:/trivy-cache" -v "/var/run/docker.sock:/var/run/docker.sock" -v /etc/ssl:/etc/ssl -v /home/dk/.docker:/.docker public.ecr.aws/aquasecurity/trivy:latest --cache-dir /trivy-cache --quiet image --light --exit-code 15 --ignore-unfixed --format json ${1}
 }
 
 # Kubernetes
