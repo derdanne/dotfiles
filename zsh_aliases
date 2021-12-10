@@ -2,8 +2,25 @@
 # Typos & Shortcuts
 alias terrafrom='terraform'
 alias k='kubectl'
+alias kg='kubectl get'
+alias krm='kubectl delete'
+alias krmf='kubectl delete -f'
+alias kgp='kubectl get pod'
+alias kdp='kubectl describe pod'
+alias kgs='kubectl get service'
+alias kgd='kubectl get deployments'
+alias kgn='kubectl get nodes'
+alias kgnw='kubectl get nodes -o wide'
+alias kge='kubectl get events'
+alias kgsc='kubectl ksd get secret -o yaml'
+alias kl='kubectl logs'
+alias kei='kubectl exec -it'
+alias ke='kubectl edit -o yaml'
 
-# Naviagtion
+alias kn='kubens'
+alias kx='kubectx'
+
+# Navigation
 alias cdd="cd /home/dk/workdir"
 alias cdt="cd /tmp"
 
@@ -116,6 +133,39 @@ aws-sm-get() {
   aws secretsmanager get-secret-value --secret-id "${1}" | jq -r '.SecretString'
 }
 
+aws-kms-get() {
+  aws kms list-aliases | jq -r '.'
+}
+
+aws-ssm-list() {
+  aws ssm describe-parameters | jq -r '.Parameters[].Name'
+}
+
+aws-ssm-get() {
+  aws ssm get-parameters --names "${1}" | jq -r '.Parameters[].Value'
+}
+
+aws-ssm-get-all() {
+  aws ssm get-parameters-by-path --path "${1}" | jq -c '.Parameters[] | {Param: .Name, Value: .Value}'
+}
+
+aws-ssm-put() {
+echo "Enter the KMS Key ID: "
+read -r KMS_KEY_ID
+echo
+echo "Enter the SSM Parameter Name: "
+read -r SSM_PARAM_NAME
+echo
+echo "Enter the Parameter Value: "
+read -r SSM_PARAM_VALUE
+
+aws ssm put-parameter \
+    --name "${SSM_PARAM_NAME}" \
+    --value "${SSM_PARAM_VALUE}" \
+    --type "SecureString" \
+    --key-id "${KMS_KEY_ID}" | jq -r '.'
+}
+
 aws-ecr-login() {
   aws ecr get-login-password | docker login --username AWS --password-stdin "${1}"
 }
@@ -205,6 +255,15 @@ aws-waf-report-current(){
 aws-waf-report-ip(){
   aws lambda invoke --cli-binary-format raw-in-base64-out --payload '{"period": "current", "client_ip": "${1}"}' --invocation-type Event --function-name GenerateWAFReport --region eu-central-1 /tmp/report.log
 }
+
+aws-emr-containers-list-running-virtual-clusters() {
+  aws emr-containers list-virtual-clusters | jq .virtualClusters | jq '.[] | select(.state=="RUNNING")'
+}
+
+aws-emr-containers-list-active-endpoints() {
+  aws emr-containers list-managed-endpoints --virtual-cluster-id $1 | jq '.endpoints' | jq '.[] | select(.state=="ACTIVE")'
+}
+
 
 # Misc
 alias curlt="curl -sSo /dev/null -w 'time_namelookup:  %{time_namelookup}s\ntime_connect:  %{time_connect}s\ntime_appconnect:  %{time_appconnect}s\ntime_pretransfer:  %{time_pretransfer}s\ntime_redirect:  %{time_redirect}s\ntime_starttransfer:  %{time_starttransfer}s\ndownload_size: %{size_download} bytes\nresponse code: %{http_code}\n'"

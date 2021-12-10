@@ -68,7 +68,7 @@ ZSH_THEME="robbyrussell"
 # Custom plugins may be added to ~/.oh-my-zsh/custom/plugins/
 # Example format: plugins=(rails git textmate ruby lighthouse)
 # Add wisely, as too many plugins slow down shell startup.
-plugins=(git docker helm kubectl git-flow terraform zsh-autosuggestions)
+plugins=(git docker helm kubectl git-flow terraform zsh-autosuggestions kube-ps1)
 
 source $ZSH/oh-my-zsh.sh
 
@@ -97,3 +97,5 @@ PATH="$PATH:$HOME/.local/bin:$HOME/bin"
 #
 #
 source ~/.zsh_aliases
+
+export PS1='$(kube_ps1 | sed "s#arn.*cluster/##g")'$PS1'[%D{%L:%M:%S}]'$'\n ~ '
